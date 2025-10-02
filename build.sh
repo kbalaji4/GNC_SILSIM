@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Simple build script for EKF simulator
+echo "Building EKF Simulator..."
+
+# Check if Eigen is installed
+if ! pkg-config --exists eigen3; then
+    echo "Eigen3 not found. Please install Eigen3:"
+    echo "  macOS: brew install eigen"
+    echo "  Ubuntu: sudo apt-get install libeigen3-dev"
+    echo "  Or download from: https://eigen.tuxfamily.org/"
+    exit 1
+fi
+
+# Get Eigen include path
+EIGEN_INCLUDE=$(pkg-config --cflags eigen3 | sed 's/-I//')
+
+# Compile the project
+echo "Compiling with Eigen at: $EIGEN_INCLUDE"
+
+g++ -std=c++17 -O2 -Wall -Wextra \
+    -I"$EIGEN_INCLUDE" \
+    -I. \
+    test_ekf.cpp \
+    ekf.cpp \
+    -o test_ekf
+
+if [ $? -eq 0 ]; then
+    echo "Build successful! Run with: ./test_ekf"
+else
+    echo "Build failed!"
+    exit 1
+fi
