@@ -37,6 +37,10 @@ public:
             size_t index = (head - count + start + i + Size) % Size;
             dest[i] = data[index];
         }
+        // pad any remaining requested elements with default-initialized values
+        for (size_t i = actualLength; i < length; i++) {
+            dest[i] = T{};
+        }
     }
     
     size_t size() const {

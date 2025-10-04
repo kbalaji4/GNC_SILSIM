@@ -342,11 +342,11 @@ void EKF::getThrust(float timestamp, euler_t angles, FSMState FSM_state,Eigen::M
                 auto it = O5500X_data.lower_bound(timestamp);
                 if (it != O5500X_data.end())
                 {
-                    float x0 = it->first;
-                    float y0 = it->second;
-                    ++it;
                     float x1 = it->first;
                     float y1 = it->second;
+                    --it;
+                    float x0 = it->first;
+                    float y0 = it->second;
                     interpolatedValue = linearInterpolation(x0, y0, x1, y1, timestamp);
                 }
             }
@@ -359,11 +359,11 @@ void EKF::getThrust(float timestamp, euler_t angles, FSMState FSM_state,Eigen::M
                 auto it = moonburner_data.lower_bound(timestamp);
                 if (it != moonburner_data.end())
                 {
-                    float x0 = it->first;
-                    float y0 = it->second;
-                    ++it;
                     float x1 = it->first;
                     float y1 = it->second;
+                    --it;
+                    float x0 = it->first;
+                    float y0 = it->second;
                     interpolatedValue = linearInterpolation(x0, y0, x1, y1, timestamp);
                 }
             }
@@ -390,11 +390,14 @@ void EKF::update(Barometer barometer, Acceleration acceleration, Orientation ori
         float sum = 0;
         float data[10];
         alt_buffer.readSlice(data, 0, 10);
-        for (float i : data)
+        size_t n = alt_buffer.size();
+        if (n == 0) n = 1; // avoid div by zero; keep last state
+        n = std::min<size_t>(n, 10);
+        for (size_t idx = 0; idx < n; ++idx)
         {
-            sum += i;
+            sum += data[idx];
         }
-        KalmanState kalman_state = (KalmanState){sum / 10.0f, 0, 0, 0, 0, 0, 0, 0, 0};
+        KalmanState kalman_state = (KalmanState){sum / static_cast<float>(n), 0, 0, 0, 0, 0, 0, 0, 0};
         setState(kalman_state);
     }
     else if (FSM_state >= FSMState::STATE_APOGEE)

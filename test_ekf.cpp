@@ -29,6 +29,10 @@ struct FlightData {
     FSMState fsm;
     KalmanData kalman;
     Pyro pyro;
+    
+    // Raw sensor data for comparison
+    float barometer_altitude;
+    float highg_ax, highg_ay, highg_az;
 };
 
 class CSVReader {
@@ -162,6 +166,12 @@ public:
                     }
                 }
 
+                // Store raw sensor data for comparison
+                row.barometer_altitude = row.barometer.altitude;
+                row.highg_ax = row.highg.ax;
+                row.highg_ay = row.highg.ay;
+                row.highg_az = row.highg.az;
+                
                 // update last_valid snapshot
                 last_valid = row;
                 
@@ -193,6 +203,7 @@ private:
     std::vector<FlightData> flight_data;
     std::vector<KalmanData> results;
     float start_time;
+    FSMState stop_state;
     
     static const char* fsmToString(FSMState s) {
         switch (s) {
@@ -216,7 +227,8 @@ private:
     }
     
 public:
-    EKFSimulator(const std::string& csv_filename) {
+    EKFSimulator(const std::string& csv_filename, FSMState stop_state = FSMState::STATE_LANDED) 
+        : stop_state(stop_state) {
         CSVReader reader;
         flight_data = reader.readCSV(csv_filename);
         std::cout << "Loaded " << flight_data.size() << " data points" << std::endl;
@@ -242,6 +254,13 @@ public:
         for (size_t i = 0; i < flight_data.size(); i++) {
             const FlightData& data = flight_data[i];
             
+            // Stop processing when we reach the specified stop state
+            if (data.fsm == stop_state) {
+                std::cout << "Reached " << fsmToString(stop_state) << " at time " << (data.timestamp - start_time) / 1000.0f << "s" << std::endl;
+                std::cout << "Stopping simulation at data point " << i << std::endl;
+                break;
+            }
+            
             // Calculate time step
             float dt = (data.timestamp - last_timestamp) / 1000.0f; // Convert to seconds
             if (dt < 0 || dt > 1.0f) dt = 0.05f; // Clamp to reasonable values
@@ -262,10 +281,11 @@ public:
             KalmanData current_state = ekf.getState();
             results.push_back(current_state);
             
-            // Print progress every 1000 iterations
+            // Print progress every 100 iterations (more frequent for shorter run)
             if (i % 1000 == 0) {
                 std::cout << "Processed " << i << " data points" << std::endl;
                 std::cout << "Time: " << (data.timestamp - start_time) / 1000.0f << "s" << std::endl;
+                std::cout << "FSM: " << fsmToString(current_fsm) << std::endl;
                 std::cout << "Position: (" << current_state.position.px << ", " 
                          << current_state.position.py << ", " << current_state.position.pz << ")" << std::endl;
                 std::cout << "Velocity: (" << current_state.velocity.vx << ", " 
@@ -289,7 +309,7 @@ public:
         }
         
         // Write header
-        file << "timestamp,pos_x,pos_y,pos_z,vel_x,vel_y,vel_z,acc_x,acc_y,acc_z,altitude,fsm" << std::endl;
+        file << "timestamp,pos_x,pos_y,pos_z,vel_x,vel_y,vel_z,acc_x,acc_y,acc_z,altitude,fsm,raw_baro_alt,raw_highg_ax,raw_highg_ay,raw_highg_az" << std::endl;
         
         // Write data
         for (size_t i = 0; i < results.size() && i < flight_data.size(); i++) {
@@ -308,7 +328,11 @@ public:
                  << result.acceleration.ay << ","
                  << result.acceleration.az << ","
                  << result.altitude << ","
-                 << fsmToString(data.fsm) << std::endl;
+                 << fsmToString(data.fsm) << ","
+                 << data.barometer_altitude << ","
+                 << data.highg_ax << ","
+                 << data.highg_ay << ","
+                 << data.highg_az << std::endl;
         }
         
         file.close();
@@ -339,12 +363,37 @@ private:
 int main(int argc, char* argv[]) {
     std::string csv_filename = "MIDAS Sustainer (Trimmed CSV).csv";
     std::string output_filename = "ekf_results.csv";
+    FSMState stop_state = FSMState::STATE_LANDED; // Default: run until landed
     
     if (argc > 1) {
         csv_filename = argv[1];
     }
     if (argc > 2) {
         output_filename = argv[2];
+    }
+    if (argc > 3) {
+        std::string stop_state_str = argv[3];
+        // Parse stop state
+        if (stop_state_str == "STATE_SAFE") stop_state = FSMState::STATE_SAFE;
+        else if (stop_state_str == "STATE_PYRO_TEST") stop_state = FSMState::STATE_PYRO_TEST;
+        else if (stop_state_str == "STATE_IDLE") stop_state = FSMState::STATE_IDLE;
+        else if (stop_state_str == "STATE_FIRST_BOOST") stop_state = FSMState::STATE_FIRST_BOOST;
+        else if (stop_state_str == "STATE_BURNOUT") stop_state = FSMState::STATE_BURNOUT;
+        else if (stop_state_str == "STATE_COAST") stop_state = FSMState::STATE_COAST;
+        else if (stop_state_str == "STATE_APOGEE") stop_state = FSMState::STATE_APOGEE;
+        else if (stop_state_str == "STATE_DROGUE_DEPLOY") stop_state = FSMState::STATE_DROGUE_DEPLOY;
+        else if (stop_state_str == "STATE_DROGUE") stop_state = FSMState::STATE_DROGUE;
+        else if (stop_state_str == "STATE_MAIN_DEPLOY") stop_state = FSMState::STATE_MAIN_DEPLOY;
+        else if (stop_state_str == "STATE_MAIN") stop_state = FSMState::STATE_MAIN;
+        else if (stop_state_str == "STATE_LANDED") stop_state = FSMState::STATE_LANDED;
+        else if (stop_state_str == "STATE_SUSTAINER_IGNITION") stop_state = FSMState::STATE_SUSTAINER_IGNITION;
+        else if (stop_state_str == "STATE_SECOND_BOOST") stop_state = FSMState::STATE_SECOND_BOOST;
+        else if (stop_state_str == "STATE_FIRST_SEPARATION") stop_state = FSMState::STATE_FIRST_SEPARATION;
+        else {
+            std::cerr << "Unknown FSM state: " << stop_state_str << std::endl;
+            std::cerr << "Valid states: STATE_SAFE, STATE_PYRO_TEST, STATE_IDLE, STATE_FIRST_BOOST, STATE_BURNOUT, STATE_COAST, STATE_APOGEE, STATE_DROGUE_DEPLOY, STATE_DROGUE, STATE_MAIN_DEPLOY, STATE_MAIN, STATE_LANDED, STATE_SUSTAINER_IGNITION, STATE_SECOND_BOOST, STATE_FIRST_SEPARATION" << std::endl;
+            return 1;
+        }
     }
     
     std::cout << "EKF Flight Data Simulator" << std::endl;
@@ -353,7 +402,7 @@ int main(int argc, char* argv[]) {
     std::cout << "---" << std::endl;
     
     try {
-        EKFSimulator simulator(csv_filename);
+        EKFSimulator simulator(csv_filename, stop_state);
         simulator.runSimulation();
         simulator.saveResults(output_filename);
         

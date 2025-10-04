@@ -1,31 +1,29 @@
 cmake_minimum_required(VERSION 3.10)
-project(EKFSimulator)
+project(EKFSimulatorRewritten)
 
-# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find Eigen3
+# Find Eigen
 find_package(Eigen3 REQUIRED)
 
 # Include directories
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-# Add executable
-add_executable(test_ekf
-    test_ekf.cpp
-    ekf.cpp
+# Source files
+set(SOURCES
+    test_ekf_rewritten.cpp
+    ekf_rewritten.cpp
 )
 
-# Link libraries
-target_link_libraries(test_ekf Eigen3::Eigen)
+# Create executable
+add_executable(test_ekf_rewritten ${SOURCES})
 
-# Compiler-specific options
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(test_ekf PRIVATE -Wall -Wextra -O2)
-endif()
+# Link Eigen
+target_link_libraries(test_ekf_rewritten Eigen3::Eigen)
 
-# Set output directory
-set_target_properties(test_ekf PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-)
+# Compiler flags
+target_compile_options(test_ekf_rewritten PRIVATE -Wall -Wextra -O2)
+
+# Print Eigen location
+message(STATUS "Compiling with Eigen at: ${EIGEN3_INCLUDE_DIR}")
