@@ -47,7 +47,7 @@ public:
         H = Eigen::Matrix<float, _NumInputs, _NumStates>::Zero();
         P_k = Eigen::Matrix<float, _NumStates, _NumStates>::Zero();
         Q = Eigen::Matrix<float, _NumStates, _NumStates>::Zero();
-        R = Eigen::Matrix<float, _NumInputs, _NumInputs>::Zero(); // Diagonal
+        R = Eigen::Matrix<float, _NumInputs, _NumInputs>::Zero();
         P_priori = Eigen::Matrix<float, _NumStates, _NumStates>::Zero();
         x_priori = Eigen::Matrix<float, _NumStates, 1>::Zero();
         K = Eigen::Matrix<float, _NumStates, _NumInputs>::Zero();

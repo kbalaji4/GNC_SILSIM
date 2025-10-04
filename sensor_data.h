@@ -2,7 +2,6 @@
 
 #include <string>
 
-// Basic data structures for sensor readings
 struct Barometer {
     float temperature;
     float pressure;
@@ -65,7 +64,6 @@ struct KalmanData {
     float altitude;
 };
 
-// FSM States enum - matches actual flight software
 enum class FSMState {
     STATE_SAFE = 0,
     STATE_PYRO_TEST = 1,
@@ -85,7 +83,6 @@ enum class FSMState {
     FSM_STATE_COUNT = 15
 };
 
-// Define the constants for compatibility
 const FSMState STATE_SAFE = FSMState::STATE_SAFE;
 const FSMState STATE_PYRO_TEST = FSMState::STATE_PYRO_TEST;
 const FSMState STATE_IDLE = FSMState::STATE_IDLE;
@@ -102,7 +99,6 @@ const FSMState STATE_SUSTAINER_IGNITION = FSMState::STATE_SUSTAINER_IGNITION;
 const FSMState STATE_SECOND_BOOST = FSMState::STATE_SECOND_BOOST;
 const FSMState STATE_FIRST_SEPARATION = FSMState::STATE_FIRST_SEPARATION;
 
-// Additional sensor data structures
 struct LowGData {
     float ax, ay, az;
 };

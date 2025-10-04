@@ -12,7 +12,6 @@
 #include "sensor_data.h"
 #include "systems.h"
 
-// CSV Data structure to hold parsed flight data
 struct FlightData {
     std::string sensor;
     int file_number;
@@ -30,7 +29,6 @@ struct FlightData {
     KalmanData kalman;
     Pyro pyro;
     
-    // Raw sensor data for comparison
     float barometer_altitude;
     float highg_ax, highg_ay, highg_az;
 };
@@ -62,7 +60,6 @@ public:
             return data;
         }
         
-        // Read headers
         if (std::getline(file, line)) {
             std::stringstream ss(line);
             std::string header;
@@ -73,7 +70,6 @@ public:
             }
         }
         
-        // Read data rows
         FlightData last_valid{};
         last_valid.sensor = "";
         last_valid.file_number = 0;
@@ -89,15 +85,12 @@ public:
             }
             
             if (values.size() < headers.size()) {
-                continue; // Skip incomplete rows
+                continue;
             }
             
-            // Parse the data (forward-fill any missing/NaN values using last_valid)
             try {
-                // start from last snapshot
                 row = last_valid;
 
-                // meta
                 {
                     std::string v = getValue(values, "sensor");
                     if (!v.empty() && v != "NaN") row.sensor = v;
@@ -108,22 +101,18 @@ public:
                 }
                 row.timestamp = toFloatOr(getValue(values, "timestamp"), row.timestamp);
                 
-                // LowG data
                 row.lowg.ax = toFloatOr(getValue(values, "lowg.ax"), row.lowg.ax);
                 row.lowg.ay = toFloatOr(getValue(values, "lowg.ay"), row.lowg.ay);
                 row.lowg.az = toFloatOr(getValue(values, "lowg.az"), row.lowg.az);
                 
-                // HighG data
                 row.highg.ax = toFloatOr(getValue(values, "highg.ax"), row.highg.ax);
                 row.highg.ay = toFloatOr(getValue(values, "highg.ay"), row.highg.ay);
                 row.highg.az = toFloatOr(getValue(values, "highg.az"), row.highg.az);
                 
-                // Barometer data
                 row.barometer.temperature = toFloatOr(getValue(values, "barometer.temperature"), row.barometer.temperature);
                 row.barometer.pressure = toFloatOr(getValue(values, "barometer.pressure"), row.barometer.pressure);
                 row.barometer.altitude = toFloatOr(getValue(values, "barometer.altitude"), row.barometer.altitude);
                 
-                // Orientation data
                 {
                     std::string v = getValue(values, "orientation.has_data");
                     if (!v.empty() && v != "NaN") { try { row.orientation.has_data = std::stoi(v) != 0; } catch (...) {} }
@@ -144,7 +133,6 @@ public:
                 row.orientation.angular_velocity.vy = toFloatOr(getValue(values, "orientation.angular_velocity.vy"), row.orientation.angular_velocity.vy);
                 row.orientation.angular_velocity.vz = toFloatOr(getValue(values, "orientation.angular_velocity.vz"), row.orientation.angular_velocity.vz);
                 
-                // FSM State
                 {
                     std::string fsm_str = getValue(values, "fsm");
                     if (!fsm_str.empty() && fsm_str != "NaN") {
@@ -166,18 +154,15 @@ public:
                     }
                 }
 
-                // Store raw sensor data for comparison
                 row.barometer_altitude = row.barometer.altitude;
                 row.highg_ax = row.highg.ax;
                 row.highg_ay = row.highg.ay;
                 row.highg_az = row.highg.az;
                 
-                // update last_valid snapshot
                 last_valid = row;
                 
                 data.push_back(row);
             } catch (const std::exception& e) {
-                // Skip rows with parsing errors
                 continue;
             }
         }
@@ -192,7 +177,7 @@ private:
         if (it != header_index.end() && it->second < values.size()) {
             return values[it->second];
         }
-        return "0"; // Default value
+        return "0";
     }
 };
 
@@ -246,7 +231,6 @@ public:
         
         std::cout << "Starting EKF simulation..." << std::endl;
         
-        // Initialize the EKF
         initializeEKF();
         
         float last_timestamp = start_time;
@@ -254,34 +238,27 @@ public:
         for (size_t i = 0; i < flight_data.size(); i++) {
             const FlightData& data = flight_data[i];
             
-            // Stop processing when we reach the specified stop state
             if (data.fsm == stop_state) {
                 std::cout << "Reached " << fsmToString(stop_state) << " at time " << (data.timestamp - start_time) / 1000.0f << "s" << std::endl;
                 std::cout << "Stopping simulation at data point " << i << std::endl;
                 break;
             }
             
-            // Calculate time step
-            float dt = (data.timestamp - last_timestamp) / 1000.0f; // Convert to seconds
-            if (dt < 0 || dt > 1.0f) dt = 0.05f; // Clamp to reasonable values
+            float dt = (data.timestamp - last_timestamp) / 1000.0f;
+            if (dt < 0 || dt > 1.0f) dt = 0.05f;
             
-            // Update sensor buffers
             updateSensorBuffers(data);
             
-            // Create sensor data structures
             Barometer current_barom = data.barometer;
             Acceleration current_accel = {data.highg.ax, data.highg.ay, data.highg.az};
             Orientation current_orientation = data.orientation;
             FSMState current_fsm = data.fsm;
             
-            // Run EKF tick
             ekf.tick(dt, 13.0f, current_barom, current_accel, current_orientation, current_fsm);
             
-            // Get and store results
             KalmanData current_state = ekf.getState();
             results.push_back(current_state);
             
-            // Print progress every 100 iterations (more frequent for shorter run)
             if (i % 1000 == 0) {
                 std::cout << "Processed " << i << " data points" << std::endl;
                 std::cout << "Time: " << (data.timestamp - start_time) / 1000.0f << "s" << std::endl;
@@ -308,10 +285,8 @@ public:
             return;
         }
         
-        // Write header
         file << "timestamp,pos_x,pos_y,pos_z,vel_x,vel_y,vel_z,acc_x,acc_y,acc_z,altitude,fsm,raw_baro_alt,raw_highg_ax,raw_highg_ay,raw_highg_az" << std::endl;
         
-        // Write data
         for (size_t i = 0; i < results.size() && i < flight_data.size(); i++) {
             const KalmanData& result = results[i];
             const FlightData& data = flight_data[i];
@@ -341,12 +316,10 @@ public:
     
 private:
     void initializeEKF() {
-        // Initialize sensor buffers with first few data points
         for (int i = 0; i < std::min(30, (int)flight_data.size()); i++) {
             updateSensorBuffers(flight_data[i]);
         }
         
-        // Initialize the EKF
         ekf.initialize(&rocket_systems);
         std::cout << "EKF initialized" << std::endl;
     }
@@ -363,7 +336,7 @@ private:
 int main(int argc, char* argv[]) {
     std::string csv_filename = "MIDAS Sustainer (Trimmed CSV).csv";
     std::string output_filename = "ekf_results.csv";
-    FSMState stop_state = FSMState::STATE_LANDED; // Default: run until landed
+    FSMState stop_state = FSMState::STATE_LANDED;
     
     if (argc > 1) {
         csv_filename = argv[1];
@@ -373,7 +346,6 @@ int main(int argc, char* argv[]) {
     }
     if (argc > 3) {
         std::string stop_state_str = argv[3];
-        // Parse stop state
         if (stop_state_str == "STATE_SAFE") stop_state = FSMState::STATE_SAFE;
         else if (stop_state_str == "STATE_PYRO_TEST") stop_state = FSMState::STATE_PYRO_TEST;
         else if (stop_state_str == "STATE_IDLE") stop_state = FSMState::STATE_IDLE;

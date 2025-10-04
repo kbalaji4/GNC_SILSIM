@@ -1,25 +1,19 @@
 #!/bin/bash
 
-# EKF Simulation Runner Script
-# This script builds, runs the simulation, and plots results in one command
+set -e
 
-set -e  # Exit on any error
-
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Default values
 INPUT_FILE="MIDAS Sustainer (Trimmed CSV).csv"
 OUTPUT_FILE="results.csv"
 PLOT_RESULTS=true
 STOP_STATE="STATE_LANDED"
 INTERACTIVE_PLOT=false
 
-# Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         -i|--input)
@@ -73,7 +67,6 @@ echo -e "${BLUE}    EKF Flight Data Simulator Runner    ${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# Check if input file exists
 if [ ! -f "$INPUT_FILE" ]; then
     echo -e "${RED}Error: Input file '$INPUT_FILE' not found!${NC}"
     echo "Available CSV files:"
@@ -89,7 +82,6 @@ echo "  Plot results: $PLOT_RESULTS"
 echo "  Interactive: $INTERACTIVE_PLOT"
 echo ""
 
-# Step 1: Build the project
 echo -e "${YELLOW}Step 1: Building code...${NC}"
 if [ -f "build.sh" ]; then
     ./build.sh
@@ -104,7 +96,6 @@ else
 fi
 echo ""
 
-# Step 2: Run the simulation
 echo -e "${YELLOW}Running KF simulation...${NC}"
 if [ -f "./test_ekf" ]; then
     ./test_ekf "$INPUT_FILE" "$OUTPUT_FILE" "$STOP_STATE"
@@ -121,7 +112,6 @@ else
 fi
 echo ""
 
-# Step 3: Plot results (if requested)
 if [ "$PLOT_RESULTS" = true ]; then
     echo -e "${YELLOW}Plotting results...${NC}"
     if [ "$INTERACTIVE_PLOT" = true ]; then
@@ -158,7 +148,6 @@ else
 fi
 echo ""
 
-# Step 4: Show summary
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}           SIMULATION COMPLETE           ${NC}"
 echo -e "${GREEN}========================================${NC}"

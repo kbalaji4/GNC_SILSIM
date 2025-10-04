@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Simple build script for EKF simulator
 echo "Building EKF Simulator..."
 
-# Check if Eigen is installed
 if ! pkg-config --exists eigen3; then
     echo "Eigen3 not found. Please install Eigen3:"
     echo "  macOS: brew install eigen"
@@ -12,10 +10,8 @@ if ! pkg-config --exists eigen3; then
     exit 1
 fi
 
-# Get Eigen include path
 EIGEN_INCLUDE=$(pkg-config --cflags eigen3 | sed 's/-I//')
 
-# Compile the project
 echo "Compiling with Eigen at: $EIGEN_INCLUDE"
 
 g++ -std=c++17 -O2 -Wall -Wextra \
