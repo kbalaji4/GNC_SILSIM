@@ -1,31 +1,5 @@
 # EKF Flight Data Simulator
 
-This project provides a standalone test harness for your Extended Kalman Filter (EKF) designed for rocket flight data analysis. It reads flight data from a CSV file and simulates the EKF algorithm to estimate position, velocity, and acceleration.
-
-## Features
-
-- **CSV Data Processing**: Reads flight data from CSV files with sensor readings
-- **EKF Simulation**: Runs your EKF algorithm on historical flight data
-- **Real-time Visualization**: Plots position, velocity, and acceleration in 3D
-- **Modular Design**: Easy to modify and extend for different flight scenarios
-
-## Files Structure
-
-```
-├── ekf.h                    # EKF class definition
-├── ekf.cpp                  # EKF implementation
-├── kalman_filter.h          # Base Kalman filter class
-├── sensor_data.h            # Data structures for sensors
-├── systems.h               # Rocket systems definitions
-├── Buffer.h                # Circular buffer implementation
-├── definitions.h            # Mock definitions for standalone testing
-├── test_ekf.cpp            # Main test program
-├── plot_results.py         # Python plotting script
-├── build.sh                # Build script
-├── CMakeLists.txt          # CMake configuration
-└── README.md               # This file
-```
-
 ## Prerequisites
 
 - **C++17 compatible compiler** (GCC, Clang, or MSVC)
@@ -110,38 +84,11 @@ The program generates a CSV file with:
 - `acc_x`, `acc_y`, `acc_z`: Acceleration estimates (m/s²)
 - `altitude`: Altitude estimate (meters)
 
-## Visualization
-
-The Python plotting script (`plot_results.py`) generates:
-
-1. **3x3 Grid Plot**: Position, velocity, and acceleration for X, Y, Z axes
-2. **3D Trajectory**: 3D visualization of the rocket's flight path
-3. **Summary Statistics**: Flight time, max altitude, max velocity, etc.
-
 ### Running the Plotter
 
 ```bash
 python3 plot_results.py [results_csv]
 ```
-
-## Algorithm Details
-
-The EKF implementation includes:
-
-- **9-State Model**: Position, velocity, and acceleration in 3D
-- **Aerodynamic Modeling**: Drag coefficients based on Mach number
-- **Thrust Modeling**: Motor thrust curves for booster and sustainer stages
-- **Sensor Fusion**: Barometer, accelerometer, and orientation data
-- **State Machine**: Flight phase detection and handling
-
-### Key Features
-
-- **Adaptive Process Noise**: Q matrix updates based on time step
-- **Sensor Bias Correction**: Accelerometer bias compensation
-- **Coordinate Transformations**: Body-to-global frame conversions
-- **Thrust Vectoring**: Motor thrust direction modeling
-
-## Customization
 
 ### Modifying Sensor Models
 
@@ -162,43 +109,75 @@ Key parameters in `ekf.cpp`:
 3. Modify `test_ekf.cpp` to parse new CSV columns
 4. Update EKF measurement model in `ekf.cpp`
 
-## Troubleshooting
+## Using run_simulation.sh
 
-### Common Issues
+The `run_simulation.sh` script automates the entire build-run-plot workflow:
 
-1. **Eigen not found**: Install Eigen3 library
-2. **Python plotting fails**: Install required Python packages
-3. **CSV parsing errors**: Check CSV format matches expected columns
-4. **Memory issues**: Reduce data size or increase system memory
+### Basic Usage
 
-### Debug Mode
-
-Compile with debug flags:
 ```bash
-g++ -std=c++17 -g -O0 -Wall -Wextra -I"$EIGEN_INCLUDE" -I. test_ekf.cpp ekf.cpp -o test_ekf_debug
+# Run with defaults (uses MIDAS Sustainer CSV, creates results.csv)
+./run_simulation.sh
+
+# Specify input and output files
+./run_simulation.sh -i sample_1k.csv -o my_results.csv
+
+# Use interactive plotting
+./run_simulation.sh --interactive
+
+# Stop simulation at specific FSM state
+./run_simulation.sh -s STATE_COAST
+
+# Skip plotting entirely
+./run_simulation.sh --no-plot
 ```
 
-## Performance
+### Command Line Options
 
-- **Processing Speed**: ~1000 data points per second
-- **Memory Usage**: ~50MB for 1M data points
-- **Accuracy**: Depends on sensor quality and EKF tuning
+```bash
+./run_simulation.sh [options]
 
-## Contributing
+Options:
+  -i, --input FILE        Input CSV file (default: MIDAS Sustainer (Trimmed CSV).csv)
+  -o, --output FILE       Output CSV file (default: results.csv)
+  -s, --stop-state STATE  Stop at FSM state (default: STATE_LANDED)
+  --interactive           Use interactive plotting with zoom/pan
+  --no-plot              Skip plotting step
+  -h, --help             Show help message
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+### Available FSM States
 
-## License
+- `STATE_SAFE`
+- `STATE_PYRO_TEST`
+- `STATE_IDLE`
+- `STATE_FIRST_BOOST`
+- `STATE_BURNOUT`
+- `STATE_COAST`
+- `STATE_APOGEE`
+- `STATE_DROGUE_DEPLOY`
+- `STATE_DROGUE`
+- `STATE_MAIN_DEPLOY`
+- `STATE_MAIN`
+- `STATE_LANDED`
+- `STATE_SUSTAINER_IGNITION`
+- `STATE_SECOND_BOOST`
+- `STATE_FIRST_SEPARATION`
 
-This project is part of the GNC_SILSIM rocket simulation system.
+### Examples
 
-## Support
+```bash
+# Quick test with sample data and interactive plots
+./run_simulation.sh -i sample_1k.csv --interactive
 
-For issues and questions:
-1. Check the troubleshooting section
-2. Review the code comments
-3. Create an issue with detailed error messages
+# Run until coast phase, save to specific file
+./run_simulation.sh -s STATE_COAST -o coast_results.csv
+
+# Process full dataset without plotting
+./run_simulation.sh --no-plot
+
+# Get help
+./run_simulation.sh --help
+```
+
+
