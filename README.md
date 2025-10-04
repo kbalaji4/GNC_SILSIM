@@ -207,4 +207,93 @@ Options:
 ./run_simulation.sh --help
 ```
 
+## Docker Usage (Probably not needed)
+
+### Docker Setup
+
+**1. Prepare your data:**
+```bash
+# Create directories and copy your CSV files
+mkdir -p data output
+cp sample_1k.csv data/
+cp "MIDAS Sustainer (Trimmed CSV).csv" data/
+```
+
+**2. Build the Docker image:**
+```bash
+docker build -t ekf-simulator .
+```
+
+### Running with Docker
+
+**Basic simulation:**
+```bash
+# Run with default settings (uses data/MIDAS Sustainer (Trimmed CSV).csv)
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output ekf-simulator
+
+# Run with sample data
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
+  ekf-simulator ./run_simulation.sh -i data/sample_1k.csv -o output/results.csv
+
+# Run with interactive plotting
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
+  ekf-simulator ./run_simulation.sh -i data/sample_1k.csv --interactive
+
+# Stop at specific FSM state
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
+  ekf-simulator ./run_simulation.sh -s STATE_COAST -i data/sample_1k.csv
+```
+
+**Using Docker Compose:**
+```bash
+# Run with default settings
+docker-compose up
+
+# Run with custom command
+docker-compose run ekf-simulator ./run_simulation.sh -i data/sample_1k.csv -o output/results.csv
+
+# Run with interactive plotting
+docker-compose run ekf-simulator ./run_simulation.sh -i data/sample_1k.csv --interactive
+
+# Run without plotting
+docker-compose run ekf-simulator ./run_simulation.sh --no-plot -i data/sample_1k.csv
+```
+
+### Docker Commands Reference
+
+```bash
+# Build image
+docker build -t ekf-simulator .
+
+# Show help
+docker run ekf-simulator
+
+# Run with custom input/output
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
+  ekf-simulator ./run_simulation.sh -i data/your_file.csv -o output/your_results.csv
+
+# Run with specific FSM state
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
+  ekf-simulator ./run_simulation.sh -s STATE_COAST
+
+# Run with interactive plotting
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
+  ekf-simulator ./run_simulation.sh --interactive
+
+# Run without plotting
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
+  ekf-simulator ./run_simulation.sh --no-plot
+```
+
+### Viewing Results
+
+After running with Docker, your results will be in the local `output/` directory:
+```bash
+# View results
+ls -la output/
+
+# Plot results locally (if you have Python installed)
+python3 plot_results.py output/results.csv
+python3 plot_interactive.py output/results.csv
+```
 
