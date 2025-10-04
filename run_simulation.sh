@@ -8,8 +8,8 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-INPUT_FILE="MIDAS Sustainer (Trimmed CSV).csv"
-OUTPUT_FILE="results.csv"
+INPUT_FILE="data/MIDAS Sustainer (Trimmed CSV).csv"
+OUTPUT_FILE="output/results.csv"
 PLOT_RESULTS=true
 STOP_STATE="STATE_LANDED"
 INTERACTIVE_PLOT=false
@@ -48,7 +48,7 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Examples:"
             echo "  $0                                    # Use defaults"
-            echo "  $0 -i sample_1k.csv -o results.csv   # Specify files"
+            echo "  $0 -i data/sample_1k.csv -o output/results.csv   # Specify files"
             echo "  $0 -s STATE_COAST                    # Stop at coast phase"
             echo "  $0 --interactive                      # Interactive zoom/pan plots"
             echo "  $0 --no-plot                         # Skip plotting"
@@ -67,10 +67,17 @@ echo -e "${BLUE}    EKF Flight Data Simulator Runner    ${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
+# Create data and output directories if they don't exist
+mkdir -p data output
+
 if [ ! -f "$INPUT_FILE" ]; then
     echo -e "${RED}Error: Input file '$INPUT_FILE' not found!${NC}"
-    echo "Available CSV files:"
-    ls -la *.csv 2>/dev/null || echo "No CSV files found in current directory"
+    echo "Available CSV files in data/ directory:"
+    ls -la data/*.csv 2>/dev/null || echo "No CSV files found in data/ directory"
+    echo ""
+    echo "Please copy your CSV files to the data/ directory:"
+    echo "  mkdir -p data output"
+    echo "  cp your_flight_data.csv data/"
     exit 1
 fi
 

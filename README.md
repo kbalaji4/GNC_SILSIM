@@ -8,21 +8,48 @@
 
 ### Installing Dependencies
 
+**Option 1: Automated Install (Recommended)**
+```bash
+# Cross-platform dependency installer
+./install_deps.sh
+```
+
+**Option 2: Manual Installation**
+
 **macOS (using Homebrew):**
 ```bash
 brew install eigen
-pip3 install matplotlib pandas numpy
+pip3 install -r requirements.txt
 ```
 
 **Ubuntu/Debian:**
 ```bash
 sudo apt-get install libeigen3-dev
-pip3 install matplotlib pandas numpy
+pip3 install -r requirements.txt
 ```
 
 **Windows:**
-- Install Eigen from: https://eigen.tuxfamily.org/
-- Install Python packages: `pip install matplotlib pandas numpy`
+- Install Visual Studio Build Tools or MinGW-w64
+- Install CMake: https://cmake.org/download/
+- Install Eigen: https://eigen.tuxfamily.org/
+- Install Python 3: https://python.org/downloads/
+- Run: `pip install -r requirements.txt`
+
+**Option 3: Docker (Cross-platform)**
+```bash
+# Setup directories
+mkdir -p data output
+cp sample_1k.csv data/
+
+# Build Docker image
+docker build -t ekf-simulator .
+
+# Run with data volumes
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output ekf-simulator
+
+# Or use docker-compose
+docker-compose up
+```
 
 ## Building and Running
 
@@ -138,8 +165,8 @@ The `run_simulation.sh` script automates the entire build-run-plot workflow:
 ./run_simulation.sh [options]
 
 Options:
-  -i, --input FILE        Input CSV file (default: MIDAS Sustainer (Trimmed CSV).csv)
-  -o, --output FILE       Output CSV file (default: results.csv)
+  -i, --input FILE        Input CSV file (default: data/MIDAS Sustainer (Trimmed CSV).csv)
+  -o, --output FILE       Output CSV file (default: output/results.csv)
   -s, --stop-state STATE  Stop at FSM state (default: STATE_LANDED)
   --interactive           Use interactive plotting with zoom/pan
   --no-plot              Skip plotting step
@@ -168,10 +195,10 @@ Options:
 
 ```bash
 # Quick test with sample data and interactive plots
-./run_simulation.sh -i sample_1k.csv --interactive
+./run_simulation.sh -i data/sample_1k.csv --interactive
 
 # Run until coast phase, save to specific file
-./run_simulation.sh -s STATE_COAST -o coast_results.csv
+./run_simulation.sh -s STATE_COAST -o output/coast_results.csv
 
 # Process full dataset without plotting
 ./run_simulation.sh --no-plot
