@@ -17,6 +17,7 @@ INPUT_FILE="MIDAS Sustainer (Trimmed CSV).csv"
 OUTPUT_FILE="results.csv"
 PLOT_RESULTS=true
 STOP_STATE="STATE_LANDED"
+INTERACTIVE_PLOT=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -37,12 +38,17 @@ while [[ $# -gt 0 ]]; do
             STOP_STATE="$2"
             shift 2
             ;;
+        --interactive)
+            INTERACTIVE_PLOT=true
+            shift
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo "Options:"
-            echo "  -i, --input FILE     Input CSV file (default: sample_1k.csv)"
+            echo "  -i, --input FILE     Input CSV file (default: MIDAS Sustainer (Trimmed CSV).csv)"
             echo "  -o, --output FILE    Output CSV file (default: results.csv)"
             echo "  -s, --stop-state     FSM state to stop simulation at (default: STATE_LANDED)"
+            echo "  --interactive        Use interactive plotting (zoom/pan/select)"
             echo "  --no-plot           Skip plotting results"
             echo "  -h, --help          Show this help message"
             echo ""
@@ -50,6 +56,7 @@ while [[ $# -gt 0 ]]; do
             echo "  $0                                    # Use defaults"
             echo "  $0 -i sample_1k.csv -o results.csv   # Specify files"
             echo "  $0 -s STATE_COAST                    # Stop at coast phase"
+            echo "  $0 --interactive                      # Interactive zoom/pan plots"
             echo "  $0 --no-plot                         # Skip plotting"
             exit 0
             ;;
@@ -79,10 +86,11 @@ echo "  Input file:  $INPUT_FILE"
 echo "  Output file: $OUTPUT_FILE"
 echo "  Stop state:  $STOP_STATE"
 echo "  Plot results: $PLOT_RESULTS"
+echo "  Interactive: $INTERACTIVE_PLOT"
 echo ""
 
 # Step 1: Build the project
-echo -e "${YELLOW}Step 1: Building project...${NC}"
+echo -e "${YELLOW}Step 1: Building code...${NC}"
 if [ -f "build.sh" ]; then
     ./build.sh
     if [ $? -ne 0 ]; then
@@ -97,7 +105,7 @@ fi
 echo ""
 
 # Step 2: Run the simulation
-echo -e "${YELLOW}Step 2: Running EKF simulation...${NC}"
+echo -e "${YELLOW}Running KF simulation...${NC}"
 if [ -f "./test_ekf" ]; then
     ./test_ekf "$INPUT_FILE" "$OUTPUT_FILE" "$STOP_STATE"
     if [ $? -ne 0 ]; then
@@ -115,18 +123,35 @@ echo ""
 
 # Step 3: Plot results (if requested)
 if [ "$PLOT_RESULTS" = true ]; then
-    echo -e "${YELLOW}Step 3: Plotting results...${NC}"
-    if [ -f "plot_results.py" ]; then
-        python3 plot_results.py "$OUTPUT_FILE"
-        if [ $? -ne 0 ]; then
-            echo -e "${RED}Plotting failed!${NC}"
-            echo "You can still view the results in: $OUTPUT_FILE"
+    echo -e "${YELLOW}Plotting results...${NC}"
+    if [ "$INTERACTIVE_PLOT" = true ]; then
+        if [ -f "plot_interactive.py" ]; then
+            echo -e "${BLUE}Launching interactive plot...${NC}"
+            python3 plot_interactive.py "$OUTPUT_FILE"
+            if [ $? -ne 0 ]; then
+                echo -e "${RED}Interactive plotting failed!${NC}"
+                echo "You can still view the results in: $OUTPUT_FILE"
+            else
+                echo -e "${GREEN}Interactive plot launched successfully!${NC}"
+            fi
         else
-            echo -e "${GREEN}Plots generated successfully!${NC}"
+            echo -e "${RED}Error: plot_interactive.py not found!${NC}"
+            echo "Falling back to standard plots..."
+            python3 plot_results.py "$OUTPUT_FILE"
         fi
     else
-        echo -e "${RED}Error: plot_results.py not found!${NC}"
-        echo "Results are available in: $OUTPUT_FILE"
+        if [ -f "plot_results.py" ]; then
+            python3 plot_results.py "$OUTPUT_FILE"
+            if [ $? -ne 0 ]; then
+                echo -e "${RED}Plotting failed!${NC}"
+                echo "You can still view the results in: $OUTPUT_FILE"
+            else
+                echo -e "${GREEN}Plots generated successfully!${NC}"
+            fi
+        else
+            echo -e "${RED}Error: plot_results.py not found!${NC}"
+            echo "Results are available in: $OUTPUT_FILE"
+        fi
     fi
 else
     echo -e "${YELLOW}Step 3: Skipping plots (--no-plot specified)${NC}"
