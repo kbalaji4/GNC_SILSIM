@@ -9,14 +9,14 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 set(SOURCES
-    test_ekf_rewritten.cpp
-    ekf_rewritten.cpp
+    test_ekf.cpp
+    ekf.cpp
 )
 
-add_executable(test_ekf_rewritten ${SOURCES})
+add_executable(test_ekf ${SOURCES})
 
-target_link_libraries(test_ekf_rewritten Eigen3::Eigen)
+target_link_libraries(test_ekf Eigen3::Eigen)
 
-target_compile_options(test_ekf_rewritten PRIVATE -Wall -Wextra -O2)
+target_compile_options(test_ekf PRIVATE -Wall -Wextra -O2)
 
 message(STATUS "Compiling with Eigen at: ${EIGEN3_INCLUDE_DIR}")

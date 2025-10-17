@@ -97,7 +97,7 @@ def plot_ekf_results(csv_file="ekf_results.csv"):
         raw_acc_y = df['raw_highg_ay'] * 9.81  
         raw_acc_z = df['raw_highg_az'] * 9.81
         
-        axes2[0, 0].plot(time, df['pos_z'], 'b-', linewidth=2, label='KF Z Position')
+        axes2[0, 0].plot(time, df['pos_x'], 'b-', linewidth=2, label='KF Z Position')
         axes2[0, 0].plot(time, df['raw_baro_alt'], 'r--', linewidth=1, alpha=0.7, label='Raw Barometer Altitude')
         axes2[0, 0].set_title('KF Position Z vs Barometric Altitude')
         axes2[0, 0].set_ylabel('Altitude (m)')
@@ -105,7 +105,7 @@ def plot_ekf_results(csv_file="ekf_results.csv"):
         axes2[0, 0].legend()
         axes2[0, 0].grid(True)
         
-        axes2[0, 1].plot(time, df['acc_z'], 'b-', linewidth=2, label='KF Z Acceleration')
+        axes2[0, 1].plot(time, df['acc_x'], 'b-', linewidth=2, label='KF Z Acceleration')
         axes2[0, 1].plot(time, raw_acc_x, 'r--', linewidth=1, alpha=0.7, label='Raw HighG X')
         axes2[0, 1].set_title('KF Acceleration Z vs Raw HighG X')
         axes2[0, 1].set_ylabel('Acceleration (m/s²)')
@@ -121,7 +121,7 @@ def plot_ekf_results(csv_file="ekf_results.csv"):
         axes2[1, 0].legend()
         axes2[1, 0].grid(True)
         
-        axes2[1, 1].plot(time, df['acc_x'], 'b-', linewidth=2, label='KF X Acceleration')
+        axes2[1, 1].plot(time, df['acc_z'], 'b-', linewidth=2, label='KF X Acceleration')
         axes2[1, 1].plot(time, raw_acc_z, 'r--', linewidth=1, alpha=0.7, label='Raw HighG Z')
         axes2[1, 1].set_title('KF Acceleration X vs Raw HighG Z')
         axes2[1, 1].set_ylabel('Acceleration (m/s²)')
@@ -171,10 +171,10 @@ def plot_ekf_results(csv_file="ekf_results.csv"):
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(111, projection='3d')
     
-    ax.plot(df['pos_x'], df['pos_y'], df['pos_z'], 'b-', linewidth=2, label='Rocket Trajectory')
-    ax.scatter(df['pos_x'].iloc[0], df['pos_y'].iloc[0], df['pos_z'].iloc[0], 
+    ax.plot(df['pos_z'], df['pos_y'], df['pos_x'], 'b-', linewidth=2, label='Rocket Trajectory')
+    ax.scatter(df['pos_z'].iloc[0], df['pos_y'].iloc[0], df['pos_x'].iloc[0], 
                color='green', s=100, label='Start')
-    ax.scatter(df['pos_x'].iloc[-1], df['pos_y'].iloc[-1], df['pos_z'].iloc[-1], 
+    ax.scatter(df['pos_z'].iloc[-1], df['pos_y'].iloc[-1], df['pos_x'].iloc[-1], 
                color='red', s=100, label='End')
     
     ax.set_xlabel('Position X (m)')
