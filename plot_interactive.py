@@ -165,7 +165,7 @@ def main():
     if len(sys.argv) > 1:
         csv_file = sys.argv[1]
     else:
-        csv_file = "ekf_results.csv"
+        csv_file = "output/results.csv"
     
     plot_interactive_ekf_results(csv_file)
 

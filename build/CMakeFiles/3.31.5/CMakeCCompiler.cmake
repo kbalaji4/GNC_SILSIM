@@ -22,11 +22,11 @@ set(CMAKE_C_SIMULATE_VERSION "")
 
 
 
-set(CMAKE_AR "/usr/bin/ar")
-set(CMAKE_C_COMPILER_AR "")
-set(CMAKE_RANLIB "/usr/bin/ranlib")
-set(CMAKE_C_COMPILER_RANLIB "")
-set(CMAKE_LINKER "/usr/bin/ld")
+set(CMAKE_AR "/opt/homebrew/bin/arm-none-eabi-ar")
+set(CMAKE_C_COMPILER_AR "/opt/homebrew/bin/arm-none-eabi-gcc-ar")
+set(CMAKE_RANLIB "/opt/homebrew/bin/arm-none-eabi-ranlib")
+set(CMAKE_C_COMPILER_RANLIB "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib")
+set(CMAKE_LINKER "/opt/homebrew/bin/arm-none-eabi-ld")
 set(CMAKE_LINKER_LINK "")
 set(CMAKE_LINKER_LLD "")
 set(CMAKE_C_COMPILER_LINKER "/Library/Developer/CommandLineTools/usr/bin/ld")

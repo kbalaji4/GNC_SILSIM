@@ -55,6 +55,10 @@ struct Orientation {
     Velocity getVelocity() const {
         return orientation_velocity;
     }
+
+    Velocity getAngularVelocity() const {
+        return angular_velocity;
+    }
 };
 
 struct KalmanData {
