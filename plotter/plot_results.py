@@ -6,11 +6,16 @@ import numpy as np
 import sys
 import os
 
-def plot_ekf_results(csv_file="ekf_results.csv"):
+def plot_ekf_results(csv_file="output/results.csv"):
     if not os.path.exists(csv_file):
         print(f"Error: File {csv_file} not found")
         print("Please run the C++ simulation first to generate results")
         return
+    
+    # Get the directory of the CSV file to save plots in the same location
+    csv_dir = os.path.dirname(os.path.abspath(csv_file))
+    if not csv_dir:
+        csv_dir = "."
     
     try:
         df = pd.read_csv(csv_file)
@@ -164,9 +169,13 @@ def plot_ekf_results(csv_file="ekf_results.csv"):
     
     fig1.tight_layout()
     fig1.show()
+    fig1.savefig(os.path.join(csv_dir, 'ekf_results_standalone.png'), dpi=150, bbox_inches='tight')
+    print(f"Standalone plots saved to: {os.path.join(csv_dir, 'ekf_results_standalone.png')}")
     
     fig2.tight_layout()
     fig2.show()
+    fig2.savefig(os.path.join(csv_dir, 'ekf_results_comparison.png'), dpi=150, bbox_inches='tight')
+    print(f"Comparison plots saved to: {os.path.join(csv_dir, 'ekf_results_comparison.png')}")
     
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(111, projection='3d')
@@ -184,6 +193,22 @@ def plot_ekf_results(csv_file="ekf_results.csv"):
     ax.legend()
     
     plt.show()
+    plt.savefig(os.path.join(csv_dir, 'ekf_results_3d_trajectory.png'), dpi=150, bbox_inches='tight')
+    print(f"3D trajectory plot saved to: {os.path.join(csv_dir, 'ekf_results_3d_trajectory.png')}")
+    
+    # Wait for user input before closing
+    print("\n" + "="*50)
+    print("Plots are now displayed. Press 'w' and Enter to close and continue...")
+    print("="*50)
+    try:
+        user_input = input("Press 'w' + Enter to close plots: ").strip().lower()
+        while user_input != 'w':
+            print("Please press 'w' and Enter to close the plots.")
+            user_input = input("Press 'w' + Enter to close plots: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print("\nPlots closed.")
+    
+    plt.close('all')
     
     print("\n=== EKF Simulation Summary ===")
     print(f"Total flight time: {time.iloc[-1]:.2f} seconds")
@@ -198,7 +223,7 @@ def main():
     if len(sys.argv) > 1:
         csv_file = sys.argv[1]
     else:
-        csv_file = "ekf_results.csv"
+        csv_file = "output/results.csv"
     
     plot_ekf_results(csv_file)
 

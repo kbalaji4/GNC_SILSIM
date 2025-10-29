@@ -1,12 +1,13 @@
 #pragma once
 
 #include "kalman_filter.h"
-#include "../simulation/sensor_data.h"
-#include "../simulation/fsm_states.h"
-#include "../simulation/Buffer.h"
-#include <map>
-#include <string>
-
+//#include "sensor_data.h"
+//#include "Buffer.h" 
+#include "../simulation/sensor_data.h" // for sim
+#include "../simulation/Buffer.h" // for sim
+#include "constants.h"
+#include "aero_coeff.h"
+#include "rotation.h"
 
 #define NUM_STATES 9
 #define NUM_SENSOR_INPUTS 4

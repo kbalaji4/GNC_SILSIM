@@ -5,9 +5,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import CheckButtons, RadioButtons
 import sys
+import os
 
 def plot_interactive_ekf_results(csv_file):
     """Create an interactive EKF results plot with zoom/pan and plot selection"""
+    
+    # Get the directory of the CSV file to save plots in the same location
+    csv_dir = os.path.dirname(os.path.abspath(csv_file))
+    if not csv_dir:
+        csv_dir = "."
     
     print(f"Loading data from {csv_file}")
     df = pd.read_csv(csv_file)
@@ -143,6 +149,10 @@ def plot_interactive_ekf_results(csv_file):
         unique_states = list(set([label for _, label in fsm_changes]))
         print(f"\nFSM States found: {', '.join(unique_states)}")
     
+    # Save a static version of the interactive plot
+    plt.savefig(os.path.join(csv_dir, 'ekf_results_interactive.png'), dpi=150, bbox_inches='tight')
+    print(f"Interactive plot saved to: {os.path.join(csv_dir, 'ekf_results_interactive.png')}")
+    
     plt.ion()
     
     from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
@@ -156,10 +166,18 @@ def plot_interactive_ekf_results(csv_file):
     print("• Radio buttons: Quick plot selections")
     print("• Close window to exit")
     
+    print("\n" + "="*50)
+    print("Interactive plot is now displayed. Press 'w' and Enter to close and continue...")
+    print("="*50)
     try:
-        input("Press Enter to close the plot...")
+        user_input = input("Press 'w' + Enter to close interactive plot: ").strip().lower()
+        while user_input != 'w':
+            print("Please press 'w' and Enter to close the interactive plot.")
+            user_input = input("Press 'w' + Enter to close interactive plot: ").strip().lower()
     except (EOFError, KeyboardInterrupt):
-        print("Plot closed.")
+        print("\nInteractive plot closed.")
+    
+    plt.close('all')
 
 def main():
     if len(sys.argv) > 1:

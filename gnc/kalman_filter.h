@@ -5,9 +5,11 @@
 #undef round
 #undef B1
 
-#include <Eigen/Dense>
-#include "../simulation/sensor_data.h"
-#include "../simulation/systems.h"
+#include <Eigen/Eigen>
+// #include "sensor_data.h"
+// #include "systems.h"
+#include "../simulation/sensor_data.h" // For sim 
+#include "../simulation/systems.h" // for sim
 
 
 struct KalmanState {
@@ -47,7 +49,7 @@ public:
         H = Eigen::Matrix<float, _NumInputs, _NumStates>::Zero();
         P_k = Eigen::Matrix<float, _NumStates, _NumStates>::Zero();
         Q = Eigen::Matrix<float, _NumStates, _NumStates>::Zero();
-        R = Eigen::Matrix<float, _NumInputs, _NumInputs>::Zero();
+        R = Eigen::Matrix<float, _NumInputs, _NumInputs>::Zero(); // Diagonal
         P_priori = Eigen::Matrix<float, _NumStates, _NumStates>::Zero();
         x_priori = Eigen::Matrix<float, _NumStates, 1>::Zero();
         K = Eigen::Matrix<float, _NumStates, _NumInputs>::Zero();
