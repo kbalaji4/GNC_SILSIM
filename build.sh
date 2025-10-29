@@ -17,12 +17,13 @@ echo "Compiling with Eigen at: $EIGEN_INCLUDE"
 g++ -std=c++17 -O2 -Wall -Wextra \
     -I"$EIGEN_INCLUDE" \
     -I. \
-    test_ekf.cpp \
-    ekf.cpp \
-    -o test_ekf
+    -Ignc \
+    simulation/test_ekf.cpp \
+    gnc/ekf.cpp \
+    -o simulation/test_ekf
 
 if [ $? -eq 0 ]; then
-    echo "Build successful! Run with: ./test_ekf"
+    echo "Build successful! Run with: ./simulation/test_ekf"
 else
     echo "Build failed!"
     exit 1

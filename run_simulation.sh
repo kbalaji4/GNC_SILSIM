@@ -104,8 +104,8 @@ fi
 echo ""
 
 echo -e "${YELLOW}Running KF simulation...${NC}"
-if [ -f "./test_ekf" ]; then
-    ./test_ekf "$INPUT_FILE" "$OUTPUT_FILE" "$STOP_STATE"
+if [ -f "./simulation/test_ekf" ]; then
+    ./simulation/test_ekf "$INPUT_FILE" "$OUTPUT_FILE" "$STOP_STATE"
     if [ $? -ne 0 ]; then
         echo -e "${RED}Simulation failed!${NC}"
         exit 1
@@ -113,7 +113,7 @@ if [ -f "./test_ekf" ]; then
     echo -e "${GREEN}Simulation completed successfully!${NC}"
     echo "Results saved to: $OUTPUT_FILE"
 else
-    echo -e "${RED}Error: test_ekf executable not found!${NC}"
+    echo -e "${RED}Error: simulation/test_ekf executable not found!${NC}"
     echo "Make sure the build completed successfully."
     exit 1
 fi
@@ -122,9 +122,9 @@ echo ""
 if [ "$PLOT_RESULTS" = true ]; then
     echo -e "${YELLOW}Plotting results...${NC}"
     if [ "$INTERACTIVE_PLOT" = true ]; then
-        if [ -f "plot_interactive.py" ]; then
+        if [ -f "plotter/plot_interactive.py" ]; then
             echo -e "${BLUE}Launching interactive plot...${NC}"
-            python3 plot_interactive.py "$OUTPUT_FILE"
+            python3 plotter/plot_interactive.py "$OUTPUT_FILE"
             if [ $? -ne 0 ]; then
                 echo -e "${RED}Interactive plotting failed!${NC}"
                 echo "You can still view the results in: $OUTPUT_FILE"
@@ -132,13 +132,13 @@ if [ "$PLOT_RESULTS" = true ]; then
                 echo -e "${GREEN}Interactive plot launched successfully!${NC}"
             fi
         else
-            echo -e "${RED}Error: plot_interactive.py not found!${NC}"
+            echo -e "${RED}Error: plotter/plot_interactive.py not found!${NC}"
             echo "Falling back to standard plots..."
-            python3 plot_results.py "$OUTPUT_FILE"
+            python3 plotter/plot_results.py "$OUTPUT_FILE"
         fi
     else
-        if [ -f "plot_results.py" ]; then
-            python3 plot_results.py "$OUTPUT_FILE"
+        if [ -f "plotter/plot_results.py" ]; then
+            python3 plotter/plot_results.py "$OUTPUT_FILE"
             if [ $? -ne 0 ]; then
                 echo -e "${RED}Plotting failed!${NC}"
                 echo "You can still view the results in: $OUTPUT_FILE"
@@ -146,7 +146,7 @@ if [ "$PLOT_RESULTS" = true ]; then
                 echo -e "${GREEN}Plots generated successfully!${NC}"
             fi
         else
-            echo -e "${RED}Error: plot_results.py not found!${NC}"
+            echo -e "${RED}Error: plotter/plot_results.py not found!${NC}"
             echo "Results are available in: $OUTPUT_FILE"
         fi
     fi

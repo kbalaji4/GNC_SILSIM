@@ -1,8 +1,9 @@
 #pragma once
 
 #include "kalman_filter.h"
-#include "sensor_data.h"
-#include "Buffer.h"
+#include "../simulation/sensor_data.h"
+#include "../simulation/fsm_states.h"
+#include "../simulation/Buffer.h"
 #include <map>
 #include <string>
 

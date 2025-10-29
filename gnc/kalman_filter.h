@@ -6,8 +6,8 @@
 #undef B1
 
 #include <Eigen/Dense>
-#include "sensor_data.h"
-#include "systems.h"
+#include "../simulation/sensor_data.h"
+#include "../simulation/systems.h"
 
 
 struct KalmanState {
