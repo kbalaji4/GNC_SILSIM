@@ -50,7 +50,7 @@ def plot_ekf_results(csv_file="output/results.csv"):
                     prev = s
     
     axes1[0, 0].plot(time, df['pos_x'], 'b-', linewidth=1)
-    axes1[0, 0].set_title('Position X')
+    axes1[0, 0].set_title('Position X (Altitude)')
     axes1[0, 0].set_ylabel('Position (m)')
     axes1[0, 0].grid(True)
     
@@ -60,7 +60,7 @@ def plot_ekf_results(csv_file="output/results.csv"):
     axes1[0, 1].grid(True)
     
     axes1[0, 2].plot(time, df['pos_z'], 'r-', linewidth=1)
-    axes1[0, 2].set_title('Position Z (Altitude)')
+    axes1[0, 2].set_title('Position Z')
     axes1[0, 2].set_ylabel('Position (m)')
     axes1[0, 2].grid(True)
     
@@ -112,7 +112,7 @@ def plot_ekf_results(csv_file="output/results.csv"):
         
         axes2[0, 1].plot(time, df['acc_x'], 'b-', linewidth=2, label='KF Z Acceleration')
         axes2[0, 1].plot(time, raw_acc_x, 'r--', linewidth=1, alpha=0.7, label='Raw HighG X')
-        axes2[0, 1].set_title('KF Acceleration Z vs Raw HighG X')
+        axes2[0, 1].set_title('KF Acceleration X vs Raw HighG X')
         axes2[0, 1].set_ylabel('Acceleration (m/s²)')
         axes2[0, 1].set_xlabel('Time (s)')
         axes2[0, 1].legend()
@@ -128,7 +128,7 @@ def plot_ekf_results(csv_file="output/results.csv"):
         
         axes2[1, 1].plot(time, df['acc_z'], 'b-', linewidth=2, label='KF X Acceleration')
         axes2[1, 1].plot(time, raw_acc_z, 'r--', linewidth=1, alpha=0.7, label='Raw HighG Z')
-        axes2[1, 1].set_title('KF Acceleration X vs Raw HighG Z')
+        axes2[1, 1].set_title('KF Acceleration Z vs Raw HighG Z')
         axes2[1, 1].set_ylabel('Acceleration (m/s²)')
         axes2[1, 1].set_xlabel('Time (s)')
         axes2[1, 1].legend()
@@ -169,13 +169,11 @@ def plot_ekf_results(csv_file="output/results.csv"):
     
     fig1.tight_layout()
     fig1.show()
-    fig1.savefig(os.path.join(csv_dir, 'ekf_results_standalone.png'), dpi=150, bbox_inches='tight')
-    print(f"Standalone plots saved to: {os.path.join(csv_dir, 'ekf_results_standalone.png')}")
+    # PNG saving disabled during run_sim
     
     fig2.tight_layout()
     fig2.show()
-    fig2.savefig(os.path.join(csv_dir, 'ekf_results_comparison.png'), dpi=150, bbox_inches='tight')
-    print(f"Comparison plots saved to: {os.path.join(csv_dir, 'ekf_results_comparison.png')}")
+    # PNG saving disabled during run_sim
     
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(111, projection='3d')
@@ -186,15 +184,14 @@ def plot_ekf_results(csv_file="output/results.csv"):
     ax.scatter(df['pos_z'].iloc[-1], df['pos_y'].iloc[-1], df['pos_x'].iloc[-1], 
                color='red', s=100, label='End')
     
-    ax.set_xlabel('Position X (m)')
+    ax.set_xlabel('Position Z (m)')
     ax.set_ylabel('Position Y (m)')
-    ax.set_zlabel('Position Z (m)')
+    ax.set_zlabel('Position X (m)')
     ax.set_title('3D Rocket Trajectory')
     ax.legend()
     
     plt.show()
-    plt.savefig(os.path.join(csv_dir, 'ekf_results_3d_trajectory.png'), dpi=150, bbox_inches='tight')
-    print(f"3D trajectory plot saved to: {os.path.join(csv_dir, 'ekf_results_3d_trajectory.png')}")
+    # PNG saving disabled during run_sim
     
     # Wait for user input before closing
     print("\n" + "="*50)

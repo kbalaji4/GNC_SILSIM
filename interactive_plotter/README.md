@@ -67,10 +67,10 @@ interactive_plotter/
 
 ## 🔧 Technical Details
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Frontend**: HTML5, CSS3, TypeScript (compiled to ES6 JavaScript)
 - **Plotting**: Plotly.js for interactive charts
-- **Data**: CSV parsing and filtering
-- **Server**: Python HTTP server with CORS support
+- **Data**: JSON API from Python server, server-sent events for live updates
+- **Server**: Python HTTP server with CORS support, SSE, and clean Ctrl-C
 
 ## 🎨 UI Features
 
@@ -82,10 +82,10 @@ interactive_plotter/
 
 ## 🐛 Troubleshooting
 
-### CSV File Not Loading
+### Data Not Loading
 - Make sure `output/results.csv` exists in the parent directory
-- Check that the CSV file has the correct headers
-- Ensure the server is running from the `interactive_plotter` directory
+- Start the server via `python3 interactive_plotter/server.py`
+- The frontend calls `/api/results` and subscribes to `/events`
 
 ### Browser Compatibility
 - Works best in Chrome, Firefox, Safari, Edge

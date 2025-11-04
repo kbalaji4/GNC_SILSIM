@@ -149,9 +149,7 @@ def plot_interactive_ekf_results(csv_file):
         unique_states = list(set([label for _, label in fsm_changes]))
         print(f"\nFSM States found: {', '.join(unique_states)}")
     
-    # Save a static version of the interactive plot
-    plt.savefig(os.path.join(csv_dir, 'ekf_results_interactive.png'), dpi=150, bbox_inches='tight')
-    print(f"Interactive plot saved to: {os.path.join(csv_dir, 'ekf_results_interactive.png')}")
+    # PNG saving disabled during run_sim
     
     plt.ion()
     
